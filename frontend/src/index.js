@@ -1,33 +1,16 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
+import Messages from './messages'
+import { getRemoteMessages, addRemoteMessage }  from './messages/api'
 
-const Messages = ({ history }) => {
-  return history.map((message, idx) => <div key={idx}>{message}</div>)
-}
-
-const getRemoteMessages = () => {
-  return fetch('http://localhost:3001/messages')
-  .then((e) => e.json())
-}
-
-const addMessage = message => fetch('http://localhost:3001/message', {
-    body: JSON.stringify({text: message}),
-    headers: {
-      'content-type': 'application/json'
-    },
-    method: 'POST',
-    mode: 'cors',
-  })
-  .then(response => response.json())
-
-class App extends Component {
+export class App extends Component {
   constructor(props) {
     super(props)
     this.state = { currentMessage: '', messageHistory: []}
   }
 
   componentWillMount() {
-    getRemoteMessages()
+    this.props.getRemoteMessages()
       .then(remoteMessages => this.setState({messageHistory: remoteMessages}))
   }
 
@@ -37,7 +20,7 @@ class App extends Component {
 
   onSubmit = (e) => {
     e.preventDefault()
-    addMessage(this.state.currentMessage)
+    this.props.addRemoteMessage(this.state.currentMessage)
     .then(history => this.setState({
       currentMessage: '',
       messageHistory: history
@@ -54,4 +37,4 @@ class App extends Component {
   }
 }
 
-render(<App />, document.getElementById('root'))
+render(<App getRemoteMessages={getRemoteMessages} addRemoteMessage={addRemoteMessage}/>, document.getElementById('root'))
